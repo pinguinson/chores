@@ -1,0 +1,6 @@
+[project]
+name = "chore_tracker"
+requires-python = ">3.11"
+
+[tool.black]
+line-length = 80

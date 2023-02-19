@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Cookie, Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
@@ -36,7 +36,9 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 def create_chore(chore: schemas.ChoreCreate, db: Session = Depends(get_db)):
     db_chore = crud.get_chore_by_title(db, title=chore.title)
     if db_chore:
-        raise HTTPException(status_code=400, detail="Chore with this title already exists")
+        raise HTTPException(
+            status_code=400, detail="Chore with this title already exists"
+        )
     return crud.create_chore(db=db, chore=chore)
 
 
@@ -47,12 +49,21 @@ def read_chores(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 
 @app.get("/log/", response_model=list[schemas.Completion])
-def read_completions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    completions = crud.get_completions(db, skip=skip, limit=limit)
-    return completions
+def read_completions(
+    chore_id: int | None = Cookie(default=None),
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+):
+    if chore_id:
+        return crud.get_completions_by_chore(
+            db, chore_id=chore_id, skip=skip, limit=limit
+        )
+    return crud.get_completions(db, skip=skip, limit=limit)
 
 
 @app.post("/log/", response_model=schemas.Completion)
-def create_completion(completion: schemas.CompletionCreate, db: Session = Depends(get_db)):
+def create_completion(
+    completion: schemas.CompletionCreate, db: Session = Depends(get_db)
+):
     return crud.create_completion(db, co=completion)
-

@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 
 from .database import Base
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -32,4 +33,3 @@ class Completion(Base):
 
     chore = relationship("Chore", back_populates="completions")
     user = relationship("User", back_populates="completions")
-
