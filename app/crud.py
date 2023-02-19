@@ -43,28 +43,17 @@ def create_chore(db: Session, chore: schemas.ChoreCreate):
     return db_chore
 
 
-def get_completions(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Completion).offset(skip).limit(limit).all()
-
-
-def get_completions_by_chore(
-    db: Session, chore_id: int, skip: int = 0, limit: int = 100
+def get_completions(
+    db: Session,
+    chore_id: int | None = None,
+    user_id: int | None = None,
+    skip: int = 0,
+    limit: int = 100,
 ):
+    filters = make_filter(chore_id=chore_id, user_id=user_id)
     return (
         db.query(models.Completion)
-        .filter(models.Completion.chore_id == chore_id)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
-
-
-def get_completions_by_user(
-    db: Session, user_id: int, skip: int = 0, limit: int = 100
-):
-    return (
-        db.query(models.Completion)
-        .filter(models.Completion.user_id == user_id)
+        .filter_by(**filters)
         .offset(skip)
         .limit(limit)
         .all()
@@ -77,3 +66,7 @@ def create_completion(db: Session, co: schemas.CompletionCreate):
     db.commit()
     db.refresh(db_completion)
     return db_completion
+
+
+def make_filter(**kwargs: any) -> dict[str, any]:
+    return {k: v for k, v in kwargs.items() if v is not None}

@@ -50,16 +50,15 @@ def read_chores(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @app.get("/log/", response_model=list[schemas.Completion])
 def read_completions(
-    chore_id: int | None = Cookie(default=None),
+    chore_id: int | None = None,
+    user_id: int | None = None,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
 ):
-    if chore_id:
-        return crud.get_completions_by_chore(
-            db, chore_id=chore_id, skip=skip, limit=limit
-        )
-    return crud.get_completions(db, skip=skip, limit=limit)
+    return crud.get_completions(
+        db, chore_id=chore_id, user_id=user_id, skip=skip, limit=limit
+    )
 
 
 @app.post("/log/", response_model=schemas.Completion)
